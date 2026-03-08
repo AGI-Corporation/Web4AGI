@@ -1,0 +1,72 @@
+{
+  "tools": [
+    {
+      "name": "parcel_get_place_hierarchy",
+      "description": "Return country/region/county/city/parcel IDs for a coordinate.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "lat": { "type": "number" },
+          "lon": { "type": "number" }
+        },
+        "required": ["lat", "lon"]
+      }
+    },
+    {
+      "name": "parcel_get_parcel",
+      "description": "Return parcel geometry and attributes by parcel_id.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "parcel_id": { "type": "string" }
+        },
+        "required": ["parcel_id"]
+      }
+    },
+    {
+      "name": "parcel_get_agent_state",
+      "description": "Get optimization metrics and suggested actions for a parcel agent.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "parcel_id": { "type": "string" }
+        },
+        "required": ["parcel_id"]
+      }
+    },
+    {
+      "name": "parcel_get_usdx_balance",
+      "description": "Get the USDx (stablecoin) balance and limits for a parcel agent wallet.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "parcel_id": { "type": "string" }
+        },
+        "required": ["parcel_id"]
+      }
+    },
+    {
+      "name": "parcel_propose_usdx_incentive_contract",
+      "description": "Propose a USDx-denominated incentive contract for check-ins or data sharing.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "parcel_id": { "type": "string" },
+          "counterparty_agent_id": { "type": "string" },
+          "purpose": { "type": "string" },
+          "asset_symbol": { "type": "string", "enum": ["USDx"] },
+          "rate_per_event": { "type": "number" },
+          "max_total": { "type": "number" }
+        },
+        "required": [
+          "parcel_id",
+          "counterparty_agent_id",
+          "purpose",
+          "asset_symbol",
+          "rate_per_event",
+          "max_total"
+        ]
+      }
+    }
+  ]
+}
