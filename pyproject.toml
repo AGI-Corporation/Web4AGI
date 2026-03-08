@@ -1,0 +1,270 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "web4agi"
+version = "0.1.0"
+description = "Web4AGI - Metaverse-based parcel agents with trading, contracts, and communication"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "AGI Corporation", email = "agicorp.eth@icloud.com"}
+]
+keywords = [
+    "agents",
+    "ai",
+    "blockchain",
+    "trading",
+    "web3",
+    "metaverse",
+    "langgraph",
+    "x402",
+    "stablecoins"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "httpx>=0.25.0",
+    "python-multipart>=0.0.6",
+    "websockets>=12.0",
+    
+    # AI & LangChain
+    "langchain>=0.1.0",
+    "langchain-core>=0.1.0",
+    "langgraph>=0.0.25",
+    "openai>=1.6.0",
+    
+    # Blockchain & Web3
+    "web3>=6.11.0",
+    "eth-account>=0.10.0",
+    "eth-utils>=2.3.0",
+    
+    # Database
+    "sqlalchemy>=2.0.23",
+    "alembic>=1.13.0",
+    "asyncpg>=0.29.0",
+    "redis>=5.0.1",
+    
+    # Async & Concurrency
+    "aiohttp>=3.9.0",
+    "aiofiles>=23.2.0",
+    
+    # Utilities
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0.1",
+    "python-json-logger>=2.0.7",
+    "tenacity>=8.2.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "pytest-timeout>=2.2.0",
+    "pytest-xdist>=3.5.0",
+    "coverage[toml]>=7.3.0",
+    
+    # Load Testing
+    "locust>=2.19.0",
+    
+    # Linting & Formatting
+    "ruff>=0.1.9",
+    "black>=23.12.0",
+    "isort>=5.13.0",
+    "mypy>=1.7.0",
+    
+    # Type Stubs
+    "types-pyyaml>=6.0.12",
+    "types-redis>=4.6.0",
+    "types-requests>=2.31.0",
+    
+    # Security
+    "bandit>=1.7.5",
+    "safety>=2.3.5",
+    
+    # Documentation
+    "mkdocs>=1.5.3",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.24.0",
+    
+    # Development Tools
+    "ipython>=8.18.0",
+    "ipdb>=0.13.13",
+    "pre-commit>=3.6.0",
+]
+
+test = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "httpx>=0.25.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/AGI-Corporation/Web4AGI"
+"Bug Tracker" = "https://github.com/AGI-Corporation/Web4AGI/issues"
+Documentation = "https://github.com/AGI-Corporation/Web4AGI#readme"
+"Source Code" = "https://github.com/AGI-Corporation/Web4AGI"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.setuptools.package-data]
+src = ["py.typed"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--asyncio-mode=auto",
+]
+markers = [
+    "unit: Unit tests for individual components",
+    "integration: Integration tests for component interactions",
+    "e2e: End-to-end tests for complete workflows",
+    "slow: Tests that take longer to execute",
+    "fast: Quick tests for rapid feedback",
+    "wallet: Tests involving wallet operations",
+    "blockchain: Tests involving blockchain interactions",
+    "contract: Tests for smart contract functionality",
+    "trading: Tests for trading functionality",
+    "communication: Tests for agent communication",
+    "x402: Tests for X402 protocol",
+    "langgraph: Tests for LangGraph optimization",
+    "scalability: Tests for system scalability",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+    "@abc.abstractmethod",
+]
+precision = 2
+show_missing = true
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "ARG", # flake8-unused-arguments
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+    "W191",  # indentation contains tabs
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["ARG", "S101"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | \.mypy_cache
+  | \.pytest_cache
+  | __pycache__
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+follow_imports = "normal"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+[tool.bandit]
+skips = ["B101", "B601"]
+exclude_dirs = ["/tests", "/venv", "/.venv"]
