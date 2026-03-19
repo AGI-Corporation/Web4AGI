@@ -31,8 +31,9 @@ except ImportError:
     httpx = None
 
 
-X402_GATEWAY = os.getenv("X402_GATEWAY", "https://x402.org/api/v1")
+X402_GATEWAY = os.getenv("X402_GATEWAY", "https://api.x402.org/v1")
 USDX_DECIMALS = 6
+SIMULATION_MODE = os.getenv("SIMULATION_MODE", "true").lower() == "true"
 
 
 def _to_micro(amount: float) -> int:
@@ -56,10 +57,12 @@ class X402Client:
         private_key: str | None = None,
         gateway_url: str = X402_GATEWAY,
         timeout: int = 30,
+        simulation_mode: bool = SIMULATION_MODE,
     ):
         self.private_key = private_key or ""
         self.gateway_url = gateway_url.rstrip("/")
         self.timeout = timeout
+        self.simulation_mode = simulation_mode
         self._nonce = int(time.time() * 1000)
 
     # ── Internal Helpers ───────────────────────────────────────────────────
@@ -85,7 +88,7 @@ class X402Client:
 
     async def _post(self, endpoint: str, body: dict) -> dict:
         """POST to the x402 gateway. Returns parsed JSON response."""
-        if httpx is None:
+        if self.simulation_mode or httpx is None:
             return {
                 "success": True,
                 "simulated": True,
@@ -104,7 +107,7 @@ class X402Client:
 
     async def _get(self, endpoint: str, params: dict | None = None) -> dict:
         """GET from the x402 gateway. Returns parsed JSON response."""
-        if httpx is None:
+        if self.simulation_mode or httpx is None:
             return {"success": True, "simulated": True, "balance_usdx": 1000.0}
 
         url = f"{self.gateway_url}/{endpoint}"

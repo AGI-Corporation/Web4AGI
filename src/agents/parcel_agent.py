@@ -52,6 +52,7 @@ class ParcelAgent:
         self.x402 = X402Client(private_key=wallet_private_key)
         self.mcp = MCPToolkit(agent_id=self.parcel_id)
         self._message_queue: asyncio.Queue = asyncio.Queue()
+        self.goals = ["maximize_community_engagement", "minimize_utility_risk"]
 
     # ── State Management ──────────────────────────────────────────────────────
 
@@ -70,6 +71,7 @@ class ParcelAgent:
             "metadata": self.state.metadata,
             "active": self.state.active,
             "last_updated": self.state.last_updated,
+            "goals": self.goals,
         }
 
     # ── Communication (Refined MCP Interoperability) ──────────────────────────
@@ -97,6 +99,48 @@ class ParcelAgent:
             local_msgs.append(await self._message_queue.get())
 
         return remote_msgs + local_msgs
+
+    # ── Discovery & Autonomous Logic ──────────────────────────────────────────
+
+    async def discover_neighbors(self, radius_meters: float = 100.0) -> list[str]:
+        """Discover neighboring parcel IDs using Spatial Fabric MCP tools."""
+        self.logger.info(f"Discovering neighbors within {radius_meters}m")
+        # In this OS, hierarchy tool returns the parcel_id for coordinates.
+        # We simulate neighbor discovery by querying around the current location.
+        neighbors = []
+        try:
+            res = await self.mcp.call_tool(
+                "parcel_get_place_hierarchy",
+                lat=self.location["lat"] + 0.001,
+                lon=self.location["lng"] + 0.001,
+            )
+            if res.get("success") and "data" in res:
+                pid = res["data"].get("parcel_id")
+                if pid and pid != self.parcel_id:
+                    neighbors.append(pid)
+        except Exception as e:
+            self.logger.error(f"Neighbor discovery failed: {e}")
+
+        return neighbors
+
+    async def perform_autonomous_actions(self) -> None:
+        """Execute autonomous logic based on current goals."""
+        if "maximize_community_engagement" in self.goals:
+            neighbors = await self.discover_neighbors()
+            for neighbor_id in neighbors:
+                self.logger.info(f"Proposing check-in incentive contract to {neighbor_id}")
+                await self.send_message(
+                    neighbor_id,
+                    {
+                        "type": "contract_offer",
+                        "contract": {
+                            "type": "check_in_incentive",
+                            "rate_usdx": 0.5,
+                            "max_total": 50.0,
+                            "purpose": "Increase cross-parcel foot traffic",
+                        },
+                    },
+                )
 
     # ── Trading (Refined Interoperability) ────────────────────────────────────
 
@@ -195,11 +239,14 @@ class ParcelAgent:
         self.logger.info(f"Starting agent run loop (cycles={cycles})")
         count = 0
         while self.state.active:
+            # 1. Process incoming messages
             msgs = await self.receive_messages()
             for msg in msgs:
-                # Standardize message extraction from MCP envelope
                 payload = msg.get("payload", msg.get("content", msg))
                 await self._handle_message(payload)
+
+            # 2. Autonomous actions
+            await self.perform_autonomous_actions()
 
             await asyncio.sleep(1)
             count += 1
@@ -221,10 +268,15 @@ class ParcelAgent:
                 trade_type=msg.get("trade_type", "transfer"),
             )
         elif msg_type == "contract_offer":
-            await self.sign_contract(
-                counterparty_id=sender,
-                contract=msg["contract"],
-            )
+            # Auto-accept small incentive contracts for demo purposes
+            if msg["contract"].get("type") == "check_in_incentive":
+                self.logger.info(f"Auto-accepting incentive contract from {sender}")
+                await self.sign_contract(counterparty_id=sender, contract=msg["contract"])
+            else:
+                await self.sign_contract(
+                    counterparty_id=sender,
+                    contract=msg["contract"],
+                )
         elif msg_type == "optimize":
             await self.optimize(context=msg.get("context"))
         elif msg_type == "payment_received":

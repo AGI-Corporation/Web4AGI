@@ -2,6 +2,10 @@
 
 Model Context Protocol (MCP) integration for parcel agents.
 Connects to Route.X MCP server for tool discovery and inter-agent messaging.
+Also interfaces with OS-level servers:
+  - SpatialFabricServer (:3001)
+  - ParcelAgentServer (:3002)
+  - ExchangeServer (:3003)
 
 Route.X repo: https://github.com/AGI-Corporation/Route.X
 """
@@ -21,6 +25,9 @@ except ImportError:
 
 
 ROUTE_X_BASE = os.getenv("ROUTE_X_URL", "http://localhost:8001")
+SPATIAL_FABRIC_URL = os.getenv("SPATIAL_FABRIC_URL", "http://localhost:3001")
+AGENT_SERVER_URL = os.getenv("AGENT_SERVER_URL", "http://localhost:3002")
+EXCHANGE_SERVER_URL = os.getenv("EXCHANGE_SERVER_URL", "http://localhost:3003")
 
 
 # ── Tool Registry ───────────────────────────────────────────────────────────────
@@ -42,13 +49,24 @@ def register_tool(name: str, description: str = "", parameters: dict | None = No
     return decorator
 
 
-# ── Default Tool Implementations (Stubs for interoperability) ───────────────────
+# ── Default Tool Implementations (Connecting to OS Servers) ─────────────────────
 
 
 @register_tool(
     "parcel_get_place_hierarchy", "Return country/region/county/city/parcel IDs for a coordinate."
 )
 async def tool_get_place_hierarchy(lat: float, lon: float) -> dict:
+    if httpx:
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(
+                    f"{SPATIAL_FABRIC_URL}/placeHierarchy", params={"lat": lat, "lon": lon}
+                )
+                if resp.status_code == 200:
+                    return resp.json()
+        except Exception:
+            pass
+
     return {
         "parcel_id": f"sf-parcel-{int(lat * 1000)}-{int(lon * 1000)}",
         "hierarchy": ["USA", "California", "San Francisco County", "San Francisco"],
@@ -57,6 +75,15 @@ async def tool_get_place_hierarchy(lat: float, lon: float) -> dict:
 
 @register_tool("parcel_get_parcel", "Return parcel geometry and attributes by parcel_id.")
 async def tool_get_parcel(parcel_id: str) -> dict:
+    if httpx:
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(f"{SPATIAL_FABRIC_URL}/parcel/{parcel_id}")
+                if resp.status_code == 200:
+                    return resp.json()
+        except Exception:
+            pass
+
     return {
         "parcel_id": parcel_id,
         "geometry": {"type": "Polygon", "coordinates": []},
@@ -68,6 +95,15 @@ async def tool_get_parcel(parcel_id: str) -> dict:
     "parcel_get_agent_state", "Get optimization metrics and suggested actions for a parcel agent."
 )
 async def tool_get_agent_state(parcel_id: str) -> dict:
+    if httpx:
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(f"{AGENT_SERVER_URL}/agent/{parcel_id}")
+                if resp.status_code == 200:
+                    return resp.json()
+        except Exception:
+            pass
+
     return {
         "parcel_id": parcel_id,
         "metrics": {"engagement": 0.85, "liquidity": 0.42},
@@ -80,6 +116,7 @@ async def tool_get_agent_state(parcel_id: str) -> dict:
     "Get the USDx (stablecoin) balance and limits for a parcel agent wallet.",
 )
 async def tool_get_usdx_balance(parcel_id: str) -> dict:
+    # This might combine data from AgentServer and ExchangeServer
     return {"parcel_id": parcel_id, "balance_usdx": 1500.0, "limits": {"daily_transfer": 500.0}}
 
 
@@ -90,10 +127,33 @@ async def tool_propose_contract(
     parcel_id: str,
     counterparty_agent_id: str,
     purpose: str,
-    _asset_symbol: str = "USDx",
+    asset_symbol: str = "USDx",
     rate_per_event: float = 0.1,
     max_total: float = 100.0,
 ) -> dict:
+    if httpx:
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(
+                    f"{EXCHANGE_SERVER_URL}/exchange/trade",
+                    json={
+                        "sender": parcel_id,
+                        "receiver": counterparty_agent_id,
+                        "amount": max_total,
+                        "asset": asset_symbol,
+                        "memo": purpose,
+                    },
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    return {
+                        "contract_id": data.get("trade_id"),
+                        "status": "proposed",
+                        "terms": {"rate": rate_per_event, "max": max_total, "purpose": purpose},
+                    }
+        except Exception:
+            pass
+
     return {
         "contract_id": f"contract-{uuid.uuid4()}",
         "status": "proposed",

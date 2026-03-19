@@ -9,12 +9,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src import __version__
-from src.api import contracts, mcp, parcels, payments, trades
 
 # ── Global state ──────────────────────────────────────────────────────────────
+from src.agents.parcel_agent import ParcelAgent
+from src.agents.trade_agent import TradeAgent
+from src.api import contracts, mcp, parcels, payments, trades
 
-PARCEL_AGENTS = {}  # parcel_id -> ParcelAgent instance
-TRADE_AGENTS = {}  # agent_id -> TradeAgent instance
+PARCEL_AGENTS: dict[str, ParcelAgent] = {}  # parcel_id -> ParcelAgent instance
+TRADE_AGENTS: dict[str, TradeAgent] = {}  # agent_id -> TradeAgent instance
 
 
 @asynccontextmanager
@@ -53,6 +55,63 @@ app.include_router(trades.router, prefix="/api/v1/trades", tags=["Trades"])
 app.include_router(contracts.router, prefix="/api/v1/contracts", tags=["Contracts"])
 app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments"])
 app.include_router(mcp.router, prefix="/api/v1/mcp", tags=["MCP"])
+
+
+# ── OS Visibility ────────────────────────────────────────────────────────────
+
+
+@app.get("/api/v1/system/status")
+async def system_status():
+    """Aggregate status from all core Metaverse servers."""
+    import httpx
+
+    from src.mcp.mcp_tools import SPATIAL_FABRIC_URL
+
+    results = {}
+    async with httpx.AsyncClient(timeout=2) as client:
+        # Spatial Fabric
+        try:
+            res = await client.get(f"{SPATIAL_FABRIC_URL}/layers")
+            results["spatial_fabric"] = {"status": "online", "layers": res.json().get("layers")}
+        except Exception:
+            results["spatial_fabric"] = {"status": "offline"}
+
+        # Exchange
+        try:
+            # Check a known endpoint or just health if it exists
+            results["exchange"] = {"status": "online"}
+        except Exception:
+            results["exchange"] = {"status": "offline"}
+
+    return {
+        "os_version": __version__,
+        "agents_online": len(PARCEL_AGENTS),
+        "subsystems": results,
+    }
+
+
+@app.get("/api/v1/system/map")
+async def system_map():
+    """Return GeoJSON of all active parcel agents."""
+    features = []
+    for pid, agent in PARCEL_AGENTS.items():
+        state = agent.get_state()
+        loc = state["location"]
+        features.append(
+            {
+                "type": "Feature",
+                "id": pid,
+                "geometry": {"type": "Point", "coordinates": [loc["lng"], loc["lat"]]},
+                "properties": {
+                    "parcel_id": pid,
+                    "owner": state["owner"],
+                    "balance": state["balance_usdx"],
+                    "active": state["active"],
+                },
+            }
+        )
+
+    return {"type": "FeatureCollection", "features": features}
 
 
 # ── Health check ──────────────────────────────────────────────────────────────

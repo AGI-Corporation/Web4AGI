@@ -48,24 +48,29 @@ def test_private_key() -> str:
 @pytest.fixture
 def parcel_agent(sample_location, test_wallet_address, test_private_key) -> ParcelAgent:
     """Create a test ParcelAgent instance."""
-    return ParcelAgent(
+    agent = ParcelAgent(
         parcel_id="test-parcel-001",
         owner_address=test_wallet_address,
         location=sample_location,
         wallet_private_key=test_private_key,
     )
+    # Force local_only for tests to avoid external Route.X calls
+    agent.mcp.local_only = True
+    return agent
 
 
 @pytest.fixture
 def trade_agent() -> TradeAgent:
     """Create a test TradeAgent instance."""
-    return TradeAgent(agent_id="test-trade-agent-001")
+    agent = TradeAgent(agent_id="test-trade-agent-001")
+    agent.mcp.local_only = True
+    return agent
 
 
 @pytest.fixture
 def x402_client(test_private_key) -> X402Client:
     """Create a test X402Client instance."""
-    return X402Client(private_key=test_private_key)
+    return X402Client(private_key=test_private_key, simulation_mode=True)
 
 
 @pytest.fixture
