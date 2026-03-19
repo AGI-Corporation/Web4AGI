@@ -45,12 +45,14 @@ def test_private_key() -> str:
 @pytest.fixture
 def parcel_agent(sample_location, test_wallet_address, test_private_key) -> ParcelAgent:
     """Create a test ParcelAgent instance."""
-    return ParcelAgent(
+    agent = ParcelAgent(
         parcel_id="test-parcel-001",
         owner_address=test_wallet_address,
         location=sample_location,
         wallet_private_key=test_private_key,
     )
+    agent.mcp.local_only = True
+    return agent
 
 
 @pytest.fixture

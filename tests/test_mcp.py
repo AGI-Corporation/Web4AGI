@@ -14,9 +14,10 @@ def test_mcp_toolkit_creation(mcp_toolkit):
     assert mcp_toolkit.local_only is True
 
 
-def test_mcp_toolkit_list_tools(mcp_toolkit):
+@pytest.mark.asyncio
+async def test_mcp_toolkit_list_tools(mcp_toolkit):
     """Test listing available MCP tools."""
-    tools = mcp_toolkit.list_tools()
+    tools = await mcp_toolkit.list_tools()
     assert isinstance(tools, list)
     assert len(tools) > 0
     
@@ -45,8 +46,9 @@ async def test_mcp_receive_message(mcp_toolkit):
     # Simulate incoming message
     mock_message = {
         "from": "agent-002",
-        "content": {"type": "response", "data": "test"},
-        "timestamp": "2026-03-07T20:00:00Z"
+        "to": "test-mcp-001",
+        "payload": {"type": "response", "data": "test"},
+        "sent_at": "2026-03-07T20:00:00Z"
     }
     
     with patch.object(mcp_toolkit, '_poll_messages', new_callable=AsyncMock) as mock_poll:
@@ -72,7 +74,7 @@ async def test_mcp_call_tool(mcp_toolkit):
 @pytest.mark.asyncio
 async def test_mcp_register_custom_tool(mcp_toolkit):
     """Test registering a custom tool."""
-    def custom_tool(param1: str, param2: int) -> dict:
+    async def custom_tool(param1: str, param2: int) -> dict:
         return {"result": f"{param1}-{param2}"}
     
     mcp_toolkit.register_tool(
@@ -85,7 +87,7 @@ async def test_mcp_register_custom_tool(mcp_toolkit):
         }
     )
     
-    tools = mcp_toolkit.list_tools()
+    tools = await mcp_toolkit.list_tools()
     tool_names = [t["name"] for t in tools]
     assert "custom_tool" in tool_names
 
@@ -113,8 +115,8 @@ def test_mcp_validate_message_format(mcp_toolkit):
     valid_message = {
         "from": "agent-001",
         "to": "agent-002",
-        "content": {"type": "test"},
-        "timestamp": "2026-03-07T20:00:00Z"
+        "payload": {"type": "test"},
+        "sent_at": "2026-03-07T20:00:00Z"
     }
     
     assert mcp_toolkit.validate_message(valid_message) is True
