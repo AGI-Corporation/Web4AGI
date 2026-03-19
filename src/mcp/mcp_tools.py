@@ -23,11 +23,13 @@ ROUTE_X_BASE = "http://localhost:8001"  # Default Route.X MCP server
 
 # ── Type Definitions ─────────────────────────────────────────────────────────────
 
+
 class MCPTool(TypedDict):
     name: str
     description: str
     parameters: dict[str, Any]
     source: str
+
 
 class MCPMessageEnvelope(TypedDict):
     from_id: str
@@ -35,11 +37,13 @@ class MCPMessageEnvelope(TypedDict):
     payload: dict[str, Any]
     sent_at: str
 
+
 class MCPResult(TypedDict):
     success: bool
     data: Any | None
     error: str | None
     message_id: str | None
+
 
 # ── Tool Registry ───────────────────────────────────────────────────────────────
 
@@ -48,9 +52,11 @@ _LOCAL_TOOLS: dict[str, Callable] = {}
 
 def register_tool(name: str):
     """Decorator to register a local MCP tool."""
+
     def decorator(fn: Callable):
         _LOCAL_TOOLS[name] = fn
         return fn
+
     return decorator
 
 
@@ -66,7 +72,12 @@ async def tool_list_neighbors(parcel_id: str, radius_meters: float = 100.0) -> d
 
 @register_tool("trade.create_offer")
 async def tool_create_offer(seller_id: str, asset: str, amount_usdx: float) -> dict:
-    return {"tool": "trade.create_offer", "seller": seller_id, "asset": asset, "amount": amount_usdx}
+    return {
+        "tool": "trade.create_offer",
+        "seller": seller_id,
+        "asset": asset,
+        "amount": amount_usdx,
+    }
 
 
 @register_tool("trade.get_offers")
@@ -86,6 +97,7 @@ async def tool_payment_transfer(from_id: str, to_id: str, amount_usdx: float) ->
 
 # ── MCPToolkit Class ─────────────────────────────────────────────────────────────
 
+
 class MCPToolkit:
     """MCP client for parcel agents. Connects to Route.X for tool routing."""
 
@@ -103,7 +115,9 @@ class MCPToolkit:
 
     # ── Tool Execution ───────────────────────────────────────────────────────
 
-    async def call_tool(self, tool_name: str, parameters: dict[str, Any] = None, **kwargs) -> MCPResult:
+    async def call_tool(
+        self, tool_name: str, parameters: dict[str, Any] = None, **kwargs
+    ) -> MCPResult:
         """Call a tool locally or via Route.X MCP server."""
         # Merge parameters and kwargs for compatibility
         args = {**(parameters or {}), **kwargs}
@@ -119,8 +133,18 @@ class MCPToolkit:
         if self.local_only:
             # Fallback for common test tools if they are not in _LOCAL_TOOLS
             if tool_name == "get_location_data":
-                return {"success": True, "data": {"lat": 37.7, "lng": -122.4}, "error": None, "message_id": None}
-            return {"success": False, "error": f"Tool '{tool_name}' not found locally", "data": None, "message_id": None}
+                return {
+                    "success": True,
+                    "data": {"lat": 37.7, "lng": -122.4},
+                    "error": None,
+                    "message_id": None,
+                }
+            return {
+                "success": False,
+                "error": f"Tool '{tool_name}' not found locally",
+                "data": None,
+                "message_id": None,
+            }
 
         # Delegate to Route.X
         return await self._route_x_call(tool_name, args)
@@ -137,7 +161,14 @@ class MCPToolkit:
             "id": f"{self.agent_id}-{int(datetime.now(UTC).timestamp() * 1000)}",
         }
         if httpx is None:
-            return {"success": True, "data": {"simulated": True}, "tool": tool_name, "args": args, "error": None, "message_id": None}
+            return {
+                "success": True,
+                "data": {"simulated": True},
+                "tool": tool_name,
+                "args": args,
+                "error": None,
+                "message_id": None,
+            }
         async with httpx.AsyncClient() as client:
             resp = await client.post(
                 f"{self.route_x_url}/mcp",
@@ -151,9 +182,19 @@ class MCPToolkit:
 
     async def list_tools(self) -> list[MCPTool]:
         """List available MCP tools from Route.X."""
-        local: list[MCPTool] = [{"name": name, "source": "local", "description": "Local tool", "parameters": {}} for name in _LOCAL_TOOLS]
+        local: list[MCPTool] = [
+            {"name": name, "source": "local", "description": "Local tool", "parameters": {}}
+            for name in _LOCAL_TOOLS
+        ]
         if "get_location_data" not in _LOCAL_TOOLS:
-             local.append({"name": "get_location_data", "source": "local", "description": "Location service", "parameters": {}})
+            local.append(
+                {
+                    "name": "get_location_data",
+                    "source": "local",
+                    "description": "Location service",
+                    "parameters": {},
+                }
+            )
 
         if self.local_only or httpx is None:
             return local
@@ -169,7 +210,9 @@ class MCPToolkit:
         except Exception:
             return local
 
-    def register_tool(self, name: str, func: Callable, description: str = "", parameters: dict[str, Any] = None):
+    def register_tool(
+        self, name: str, func: Callable, description: str = "", parameters: dict[str, Any] = None
+    ):
         """Register a tool to the local registry."""
         _LOCAL_TOOLS[name] = func
         return func
@@ -199,8 +242,15 @@ class MCPToolkit:
     async def _send_raw(self, envelope: dict[str, Any]) -> MCPResult:
         """Raw HTTP POST for message sending."""
         if self.local_only or httpx is None:
-            print(f"[MCP Sim] {envelope['from']} -> {envelope['to']}: {json.dumps(envelope['payload'])[:80]}")
-            return {"success": True, "data": None, "message_id": f"msg-{int(datetime.now(UTC).timestamp())}", "error": None}
+            print(
+                f"[MCP Sim] {envelope['from']} -> {envelope['to']}: {json.dumps(envelope['payload'])[:80]}"
+            )
+            return {
+                "success": True,
+                "data": None,
+                "message_id": f"msg-{int(datetime.now(UTC).timestamp())}",
+                "error": None,
+            }
 
         async with httpx.AsyncClient() as client:
             resp = await client.post(
@@ -214,10 +264,12 @@ class MCPToolkit:
                 "success": res.get("success", True),
                 "data": res,
                 "message_id": res.get("message_id", f"msg-{int(datetime.now(UTC).timestamp())}"),
-                "error": None
+                "error": None,
             }
 
-    async def send_message(self, target_id: str, content: dict[str, Any], max_retries: int = 3) -> MCPResult:
+    async def send_message(
+        self, target_id: str, content: dict[str, Any], max_retries: int = 3
+    ) -> MCPResult:
         """Alias for send() as used in tests."""
         return await self.send(to=target_id, payload=content, max_retries=max_retries)
 
@@ -256,7 +308,7 @@ class MCPToolkit:
         required = ["from", "to", "payload", "sent_at"]
         # Tests use 'content' and 'timestamp' too
         if "content" in message:
-             required = ["from", "to", "content", "timestamp"]
+            required = ["from", "to", "content", "timestamp"]
         return all(f in message for f in required)
 
     def get_queue_size(self) -> int:
@@ -273,11 +325,7 @@ class MCPToolkit:
 
     async def get_connection_status(self) -> dict[str, Any]:
         """Check the connection to Route.X."""
-        return {
-            "connected": True,
-            "agent_id": self.agent_id,
-            "route_x_url": self.route_x_url
-        }
+        return {"connected": True, "agent_id": self.agent_id, "route_x_url": self.route_x_url}
 
     def inject_message(self, msg: dict[str, Any]) -> None:
         """Inject a message into the local inbox (for testing)."""

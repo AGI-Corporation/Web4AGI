@@ -17,6 +17,7 @@ from typing import Any, TypedDict
 try:
     from langgraph.checkpoint.memory import MemorySaver
     from langgraph.graph import END, StateGraph
+
     LANGGRAPH_AVAILABLE = True
 except ImportError:
     LANGGRAPH_AVAILABLE = False
@@ -24,8 +25,9 @@ except ImportError:
     END = "__end__"
 
 try:
-    from langchain_core.messages import HumanMessage
+    from langchain_core.messages import AIMessage, HumanMessage
     from langchain_openai import ChatOpenAI
+
     LANGCHAIN_AVAILABLE = True
 except ImportError:
     LANGCHAIN_AVAILABLE = False
@@ -33,6 +35,7 @@ except ImportError:
 
 
 # ── State Schema ───────────────────────────────────────────────────────────────
+
 
 class ParcelOptState(TypedDict):
     parcel_state: dict[str, Any]
@@ -48,9 +51,11 @@ class ParcelOptState(TypedDict):
 
 # ── Node Functions ─────────────────────────────────────────────────────────────
 
+
 def _get_llm():
     """Return the configured LLM (Sentient Foundation or OpenAI fallback)."""
     import os
+
     sentient_key = os.getenv("SENTIENT_API_KEY")
     sentient_url = os.getenv("SENTIENT_BASE_URL", "https://api.sentientfoundation.ai/v1")
     openai_key = os.getenv("OPENAI_API_KEY")
@@ -106,7 +111,7 @@ Parcel state: {state['parcel_state']}
 List 3 concrete optimization strategies as a numbered list.
 Each strategy should be a single actionable sentence."""
         response = llm.invoke([HumanMessage(content=prompt)])
-        lines = [line.strip() for line in response.content.split("\n") if line.strip() and line[0].isdigit()]
+        lines = [l.strip() for l in response.content.split("\n") if l.strip() and l[0].isdigit()]
         strategies = lines[:3] if lines else [response.content]
     else:
         ps = state["parcel_state"]
@@ -175,6 +180,7 @@ def should_continue(state: ParcelOptState) -> str:
 
 # ── Graph Builder ───────────────────────────────────────────────────────────────
 
+
 def build_optimization_graph():
     """Build and compile the LangGraph optimization workflow."""
     if not LANGGRAPH_AVAILABLE:
@@ -206,6 +212,7 @@ def _get_graph():
 
 
 # ── Public Entry Point ───────────────────────────────────────────────────────────
+
 
 async def run_parcel_optimization(
     parcel_state: dict[str, Any],

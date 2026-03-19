@@ -31,7 +31,7 @@ class TestContractLifecycle:
         return agent
 
     @pytest.mark.asyncio
-    @patch('src.contracts.manager.ContractManager')
+    @patch("src.contracts.manager.ContractManager")
     async def test_full_contract_flow(self, mock_manager_class, buyer, seller):
         """Test a successful contract flow from proposal to execution."""
         manager = Mock()
@@ -42,7 +42,7 @@ class TestContractLifecycle:
             "parcel_id": "parcel_001",
             "price": 5000.0,
             "terms": "Standard land lease",
-            "expiry": "2026-12-31"
+            "expiry": "2026-12-31",
         }
 
         manager.propose = Mock(return_value="contract_123")
@@ -61,17 +61,16 @@ class TestContractLifecycle:
         assert manager.sign(contract_id, seller.id, "0xsignature_seller")
 
         # 5. Execute Contract (Escrow movement)
-        manager.execute = AsyncMock(return_value={
-            "status": "executed",
-            "tx_hash": "0xtx_contract_123"
-        })
+        manager.execute = AsyncMock(
+            return_value={"status": "executed", "tx_hash": "0xtx_contract_123"}
+        )
 
         execution_result = await manager.execute(contract_id)
         assert execution_result["status"] == "executed"
         assert "tx_hash" in execution_result
 
     @pytest.mark.asyncio
-    @patch('src.contracts.manager.ContractManager')
+    @patch("src.contracts.manager.ContractManager")
     async def test_contract_rejection(self, mock_manager_class, buyer, seller):
         """Test contract rejection by counterparty."""
         manager = Mock()
@@ -86,18 +85,18 @@ class TestContractLifecycle:
         assert manager.get_status(contract_id) == "rejected"
 
     @pytest.mark.asyncio
-    @patch('src.contracts.manager.ContractManager')
+    @patch("src.contracts.manager.ContractManager")
     async def test_contract_validation_failure(self, mock_manager_class, buyer, seller):
         """Test contract creation failure due to invalid terms."""
         manager = Mock()
         mock_manager_class.return_value = manager
 
-        invalid_terms = {"price": -100} # Invalid price
+        invalid_terms = {"price": -100}  # Invalid price
         manager.propose = Mock(side_effect=ValueError("Invalid contract terms"))
 
         try:
             manager.propose(buyer.id, seller.id, invalid_terms)
-            raise AssertionError("Should have raised ValueError")
+            assert False, "Should have raised ValueError"
         except ValueError as e:
             assert str(e) == "Invalid contract terms"
 
@@ -106,7 +105,7 @@ class TestMultiPartyContracts:
     """Test contracts involving more than two agents."""
 
     @pytest.mark.asyncio
-    @patch('src.contracts.manager.ContractManager')
+    @patch("src.contracts.manager.ContractManager")
     async def test_three_party_agreement(self, mock_manager_class):
         """Test a contract requiring three signatures."""
         manager = Mock()

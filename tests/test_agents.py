@@ -5,6 +5,7 @@ from src.agents.trade_agent import TradeAgent
 
 # ── ParcelAgent Tests ───────────────────────────────────────────────────────
 
+
 def test_parcel_agent_creation(parcel_agent):
     """Test ParcelAgent initialization."""
     assert parcel_agent.parcel_id == "test-parcel-001"
@@ -98,6 +99,7 @@ async def test_parcel_agent_optimize(parcel_agent):
 
 
 # ── TradeAgent Tests ─────────────────────────────────────────────────────────
+
 
 def test_trade_agent_creation(trade_agent):
     """Test TradeAgent initialization."""

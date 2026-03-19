@@ -20,8 +20,7 @@ async def run_verification():
 
     from unittest.mock import AsyncMock, patch
 
-    with patch("httpx.AsyncClient.post") as mock_post, \
-         patch("httpx.AsyncClient.get") as mock_get:
+    with patch("httpx.AsyncClient.post") as mock_post, patch("httpx.AsyncClient.get") as mock_get:
 
         # Mock storage for the "expressor"
         inboxes = {}
@@ -32,7 +31,11 @@ async def run_verification():
                 if to_agent not in inboxes:
                     inboxes[to_agent] = []
                 inboxes[to_agent].append(json)
-                return AsyncMock(spec=httpx.Response, status_code=200, json=lambda: {"success": True, "message_id": "mock-msg-id"})
+                return AsyncMock(
+                    spec=httpx.Response,
+                    status_code=200,
+                    json=lambda: {"success": True, "message_id": "mock-msg-id"},
+                )
             return AsyncMock(spec=httpx.Response, status_code=404)
 
         async def side_effect_get(url, timeout=None):
@@ -40,7 +43,11 @@ async def run_verification():
                 agent_id = str(url).split("/")[-1]
                 msgs = inboxes.get(agent_id, [])
                 inboxes[agent_id] = []
-                return AsyncMock(spec=httpx.Response, status_code=200, json=lambda: {"success": True, "messages": msgs})
+                return AsyncMock(
+                    spec=httpx.Response,
+                    status_code=200,
+                    json=lambda: {"success": True, "messages": msgs},
+                )
             return AsyncMock(spec=httpx.Response, status_code=404)
 
         mock_post.side_effect = side_effect_post
@@ -61,6 +68,7 @@ async def run_verification():
         assert received_envelopes[0]["from"] == "agent-a"
 
     print("Verification successful!")
+
 
 if __name__ == "__main__":
     asyncio.run(run_verification())

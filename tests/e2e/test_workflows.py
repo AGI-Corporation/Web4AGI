@@ -18,7 +18,7 @@ class TestCompleteAgentLifecycle:
             "capabilities": ["trading", "communication", "contracts"],
             "wallet": {"address": "0xABC123", "chain": "ethereum"},
             "protocols": ["x402"],
-            "stablecoins": ["USDC", "USDT"]
+            "stablecoins": ["USDC", "USDT"],
         }
 
         # TODO: Initialize actual agent
@@ -29,10 +29,8 @@ class TestCompleteAgentLifecycle:
 
     async def test_agent_update_workflow(self):
         """Test updating agent with new model/capabilities."""
-        update = {
-            "model": "sentient-foundation-v2",
-            "new_capabilities": ["advanced_trading"]
-        }
+        agent_id = "test-agent-001"
+        update = {"model": "sentient-foundation-v2", "new_capabilities": ["advanced_trading"]}
 
         # TODO: Implement agent update mechanism
         assert update["model"].endswith("-v2")
@@ -58,7 +56,7 @@ class TestMultiAgentTrading:
             "to_agent": "agent-002",
             "offer": {"asset": "USDC", "amount": 100},
             "request": {"asset": "data_credits", "amount": 50},
-            "expiry": "2025-12-31T23:59:59Z"
+            "expiry": "2025-12-31T23:59:59Z",
         }
 
         # TODO: Execute trade
@@ -74,8 +72,8 @@ class TestMultiAgentTrading:
             "legs": [
                 {"from": "agent-001", "to": "agent-002", "asset": "USDC", "amount": 50},
                 {"from": "agent-002", "to": "agent-003", "asset": "credits", "amount": 25},
-                {"from": "agent-003", "to": "agent-001", "asset": "tokens", "amount": 100}
-            ]
+                {"from": "agent-003", "to": "agent-001", "asset": "tokens", "amount": 100},
+            ],
         }
 
         # TODO: Execute multi-party trade
@@ -88,7 +86,7 @@ class TestMultiAgentTrading:
             "agent_id": "amm-001",
             "pairs": [("USDC", "tokens"), ("USDT", "tokens")],
             "liquidity": {"USDC": 10000, "USDT": 10000, "tokens": 50000},
-            "fee_rate": 0.003  # 0.3%
+            "fee_rate": 0.003,  # 0.3%
         }
 
         # TODO: Implement AMM logic
@@ -108,14 +106,14 @@ class TestContractWorkflows:
             "terms": {
                 "duration": "30d",
                 "payment": {"amount": 1000, "currency": "USDC"},
-                "deliverables": ["service_1", "service_2"]
+                "deliverables": ["service_1", "service_2"],
             },
             "rounds": [
                 {"proposer": "agent-001", "counter": None},
                 {"proposer": "agent-002", "counter": {"payment.amount": 1200}},
-                {"proposer": "agent-001", "counter": {"payment.amount": 1100}}
+                {"proposer": "agent-001", "counter": {"payment.amount": 1100}},
             ],
-            "status": "agreed"
+            "status": "agreed",
         }
 
         # TODO: Implement negotiation logic
@@ -129,7 +127,7 @@ class TestContractWorkflows:
             "parties": ["0x1234", "0x5678"],
             "amount": 1000,
             "currency": "USDC",
-            "conditions": ["approval_from_both", "timeout_30d"]
+            "conditions": ["approval_from_both", "timeout_30d"],
         }
 
         # TODO: Deploy to blockchain
@@ -157,7 +155,7 @@ class TestCrossProtocolCommunication:
             "to": ["agent-002", "agent-003", "agent-004"],
             "protocol": "x402",
             "message": {"type": "market_update", "data": {"price": 1.5}},
-            "priority": "normal"
+            "priority": "normal",
         }
 
         # TODO: Broadcast via X402
@@ -173,7 +171,7 @@ class TestCrossProtocolCommunication:
             "type": "query",
             "payload": {"question": "What is your bid?"},
             "expects_response": True,
-            "timeout_ms": 5000
+            "timeout_ms": 5000,
         }
 
         expected_response = {
@@ -181,7 +179,7 @@ class TestCrossProtocolCommunication:
             "from": "agent-002",
             "to": "agent-001",
             "type": "response",
-            "payload": {"bid": 100}
+            "payload": {"bid": 100},
         }
 
         # TODO: Implement request-response
@@ -190,8 +188,15 @@ class TestCrossProtocolCommunication:
 
     async def test_pubsub_pattern(self):
         """Test publish-subscribe pattern for events."""
+        topic = "market.prices.usdc"
+        publishers = ["agent-001"]
         subscribers = ["agent-002", "agent-003", "agent-004"]
 
+        event = {
+            "topic": topic,
+            "data": {"price": 1.00, "volume": 1000000},
+            "timestamp": "2025-01-15T12:00:00Z",
+        }
 
         # TODO: Implement pubsub
         assert len(subscribers) >= 2
@@ -208,13 +213,15 @@ class TestScalabilityScenarios:
         transactions = []
 
         for i in range(num_transactions):
-            transactions.append({
-                "id": f"tx-{i:04d}",
-                "from": f"agent-{i % 10:03d}",
-                "to": f"agent-{(i+1) % 10:03d}",
-                "amount": 10,
-                "currency": "USDC"
-            })
+            transactions.append(
+                {
+                    "id": f"tx-{i:04d}",
+                    "from": f"agent-{i % 10:03d}",
+                    "to": f"agent-{(i+1) % 10:03d}",
+                    "amount": 10,
+                    "currency": "USDC",
+                }
+            )
 
         # TODO: Process all transactions
         assert len(transactions) == num_transactions
@@ -246,14 +253,14 @@ class TestLangGraphOptimization:
                 {"id": "analyze_market", "type": "analysis"},
                 {"id": "risk_assessment", "type": "evaluation"},
                 {"id": "decision", "type": "decision"},
-                {"id": "execute_trade", "type": "action"}
+                {"id": "execute_trade", "type": "action"},
             ],
             "edges": [
                 {"from": "analyze_market", "to": "risk_assessment"},
                 {"from": "risk_assessment", "to": "decision"},
-                {"from": "decision", "to": "execute_trade", "condition": "approved"}
+                {"from": "decision", "to": "execute_trade", "condition": "approved"},
             ],
-            "optimizer": "langgraph"
+            "optimizer": "langgraph",
         }
 
         # TODO: Execute optimized workflow
@@ -266,9 +273,9 @@ class TestLangGraphOptimization:
             "parallel_branches": [
                 ["check_balance", "verify_limit"],
                 ["analyze_market", "check_liquidity"],
-                ["validate_contract", "check_gas"]
+                ["validate_contract", "check_gas"],
             ],
-            "join_node": "execute_if_all_pass"
+            "join_node": "execute_if_all_pass",
         }
 
         # TODO: Execute parallel branches

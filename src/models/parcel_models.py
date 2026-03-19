@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field, field_validator
 
 # ── Location ───────────────────────────────────────────────────────────────
 
+
 class Location(BaseModel):
     lat: float = Field(..., ge=-90, le=90, description="Latitude")
     lng: float = Field(..., ge=-180, le=180, description="Longitude")
@@ -18,6 +19,7 @@ class Location(BaseModel):
 
 
 # ── Parcel ─────────────────────────────────────────────────────────────────
+
 
 class ParcelCreate(BaseModel):
     owner_address: str = Field(..., description="Wallet address of the parcel owner")
@@ -48,6 +50,7 @@ class ParcelUpdate(BaseModel):
 
 
 # ── Trades ─────────────────────────────────────────────────────────────────
+
 
 class TradeRequest(BaseModel):
     from_parcel_id: str
@@ -81,6 +84,7 @@ class BidRequest(BaseModel):
 
 # ── Contracts ──────────────────────────────────────────────────────────────
 
+
 class ContractRequest(BaseModel):
     contract_type: str = Field(..., description="parcel_lease | data_access | custom")
     party_a: str
@@ -100,6 +104,7 @@ class ContractResponse(BaseModel):
 
 # ── Optimization ────────────────────────────────────────────────────────────
 
+
 class OptimizeRequest(BaseModel):
     parcel_id: str
     context: dict[str, Any] = Field(default_factory=dict)
@@ -117,6 +122,7 @@ class OptimizeResponse(BaseModel):
 
 # ── Payments ──────────────────────────────────────────────────────────────
 
+
 class DepositRequest(BaseModel):
     parcel_id: str
     amount_usdx: float = Field(..., gt=0)
@@ -132,6 +138,7 @@ class PaymentStreamRequest(BaseModel):
 
 # ── MCP Messages ───────────────────────────────────────────────────────────
 
+
 class MCPMessage(BaseModel):
     from_parcel_id: str
     to_parcel_id: str
@@ -145,6 +152,7 @@ class MCPToolCall(BaseModel):
 
 
 # ── Generic responses ───────────────────────────────────────────────────────
+
 
 class SuccessResponse(BaseModel):
     success: bool = True

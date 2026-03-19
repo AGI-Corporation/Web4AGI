@@ -11,6 +11,7 @@ from src.payments.x402_client import X402Client
 
 # ── Event loop fixture for async tests ─────────────────────────────────────────
 
+
 @pytest.fixture(scope="session")
 def event_loop():
     """Create an instance of the default event loop for the test session."""
@@ -20,6 +21,7 @@ def event_loop():
 
 
 # ── Test data fixtures ───────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def sample_location() -> dict[str, float]:
@@ -40,6 +42,7 @@ def test_private_key() -> str:
 
 
 # ── Agent fixtures ──────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def parcel_agent(sample_location, test_wallet_address, test_private_key) -> ParcelAgent:
@@ -73,6 +76,7 @@ def mcp_toolkit() -> MCPToolkit:
 
 
 # ── Mock API fixtures ────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def sample_parcel_state() -> dict[str, Any]:

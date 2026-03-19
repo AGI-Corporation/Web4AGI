@@ -30,7 +30,9 @@ class TradeOffer:
         return datetime.utcnow().timestamp() > self.expires_at
 
     def add_bid(self, bidder_id: str, bid_amount: float) -> None:
-        self.bids.append({"bidder": bidder_id, "amount": bid_amount, "ts": datetime.utcnow().isoformat()})
+        self.bids.append(
+            {"bidder": bidder_id, "amount": bid_amount, "ts": datetime.utcnow().isoformat()}
+        )
 
     def best_bid(self) -> dict | None:
         if not self.bids:
@@ -105,10 +107,7 @@ class TradeAgent:
             for r in recipients
         ]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        return [
-            r if isinstance(r, dict) else {"success": False, "error": str(r)}
-            for r in results
-        ]
+        return [r if isinstance(r, dict) else {"success": False, "error": str(r)} for r in results]
 
     # ── Contract Templates ─────────────────────────────────────────────────
 

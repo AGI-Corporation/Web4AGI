@@ -120,9 +120,7 @@ class ParcelAgent:
             self.state.balance_usdx -= amount_usdx
         return result
 
-    async def sign_contract(
-        self, counterparty_id: str, contract: dict[str, Any]
-    ) -> dict:
+    async def sign_contract(self, counterparty_id: str, contract: dict[str, Any]) -> dict:
         """Sign a smart contract with another parcel agent."""
         return await self.x402.sign_contract(
             contract=contract,

@@ -19,9 +19,9 @@ class TestTradingLifecycle:
     """Test the complete end-to-end trading flow between agents."""
 
     @pytest.mark.asyncio
-    @patch('src.agents.parcel_agent.ParcelAgent')
-    @patch('src.agents.trade_agent.TradeAgent')
-    @patch('src.payments.x402_client.X402Client')
+    @patch("src.agents.parcel_agent.ParcelAgent")
+    @patch("src.agents.trade_agent.TradeAgent")
+    @patch("src.payments.x402_client.X402Client")
     async def test_successful_trade_flow(
         self, mock_x402_class, mock_trade_agent_class, mock_parcel_agent_class
     ):
@@ -41,7 +41,7 @@ class TestTradingLifecycle:
             "parcel_id": "parcel_001",
             "price": 5000.0,
             "buyer_id": "agent_buyer",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         # Buyer creates trade order
@@ -50,26 +50,24 @@ class TestTradingLifecycle:
         assert order_id == "order_123"
 
         # 3. Match Trade (TradeAgent matches buyer and seller)
-        trade_manager.match_orders = Mock(return_value={
-            "trade_id": "trade_456",
-            "buyer": "agent_buyer",
-            "seller": "agent_seller",
-            "amount": 5000.0
-        })
+        trade_manager.match_orders = Mock(
+            return_value={
+                "trade_id": "trade_456",
+                "buyer": "agent_buyer",
+                "seller": "agent_seller",
+                "amount": 5000.0,
+            }
+        )
         trade_match = trade_manager.match_orders("order_123")
         assert trade_match["trade_id"] == "trade_456"
 
         # 4. Process Payment (X402 Protocol)
-        payment_client.transfer = AsyncMock(return_value={
-            "transaction_hash": "0xtx123",
-            "status": "confirmed"
-        })
+        payment_client.transfer = AsyncMock(
+            return_value={"transaction_hash": "0xtx123", "status": "confirmed"}
+        )
 
         payment_result = await payment_client.transfer(
-            from_addr="0xbuyer",
-            to_addr="0xseller",
-            amount=5000.0,
-            currency="USD"
+            from_addr="0xbuyer", to_addr="0xseller", amount=5000.0, currency="USD"
         )
 
         assert payment_result["status"] == "confirmed"
@@ -86,7 +84,7 @@ class TestTradingLifecycle:
         assert seller.on_trade_completed.called
 
     @pytest.mark.asyncio
-    @patch('src.payments.x402_client.X402Client')
+    @patch("src.payments.x402_client.X402Client")
     async def test_trade_failure_insufficient_funds(self, mock_x402_class):
         """Test trade flow failure due to insufficient funds."""
         payment_client = AsyncMock()
@@ -97,12 +95,12 @@ class TestTradingLifecycle:
 
         try:
             await payment_client.transfer("0xbuyer", "0xseller", 1000000.0)
-            raise AssertionError("Should have raised Exception")
+            assert False, "Should have raised Exception"
         except Exception as e:
             assert str(e) == "Insufficient balance"
 
     @pytest.mark.asyncio
-    @patch('src.agents.trade_agent.TradeAgent')
+    @patch("src.agents.trade_agent.TradeAgent")
     async def test_trade_timeout(self, mock_trade_agent_class):
         """Test handling of trade expiration/timeout."""
         trade_manager = Mock()
@@ -132,9 +130,7 @@ class TestMultiAgentTrading:
         # Simulate concurrent transfers
         tasks = []
         for i in range(num_trades):
-            tasks.append(
-                mock_payment_client.transfer(f"0xagent_{i}", "0xseller", 100.0)
-            )
+            tasks.append(mock_payment_client.transfer(f"0xagent_{i}", "0xseller", 100.0))
 
         results = await asyncio.gather(*tasks)
 
@@ -151,7 +147,7 @@ class TestMultiAgentTrading:
         bids = [
             {"bidder": "agent_1", "amount": 100.0},
             {"bidder": "agent_2", "amount": 150.0},
-            {"bidder": "agent_3", "amount": 125.0}
+            {"bidder": "agent_3", "amount": 125.0},
         ]
 
         # TradeAgent selects the highest bid

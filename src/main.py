@@ -14,11 +14,11 @@ from src.api import contracts, mcp, parcels, payments, trades
 # ── Global state ──────────────────────────────────────────────────────────────
 
 PARCEL_AGENTS = {}  # parcel_id -> ParcelAgent instance
-TRADE_AGENTS = {}   # agent_id -> TradeAgent instance
+TRADE_AGENTS = {}  # agent_id -> TradeAgent instance
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI):
+async def lifespan(app: FastAPI):
     """Startup/shutdown lifecycle for FastAPI app."""
     # Startup: initialize any persistent connections, etc.
     print(f"[Web4AGI] Starting up... version {__version__}")
@@ -57,6 +57,7 @@ app.include_router(mcp.router, prefix="/api/v1/mcp", tags=["MCP"])
 
 # ── Health check ──────────────────────────────────────────────────────────────
 
+
 @app.get("/")
 async def root():
     return {
@@ -78,4 +79,5 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)

@@ -23,13 +23,13 @@ logger = logging.getLogger(__name__)
 
 def random_string(length=8):
     """Generate a random string for unique identifiers."""
-    return ''.join(random.choices(string.ascii_lowercase, k=length))
+    return "".join(random.choices(string.ascii_lowercase, k=length))
 
 
 def random_address():
     """Generate a mock wallet address."""
     hex_chars = string.hexdigits[:16]
-    return '0x' + ''.join(random.choices(hex_chars, k=40))
+    return "0x" + "".join(random.choices(hex_chars, k=40))
 
 
 class AgentUser(HttpUser):
@@ -54,11 +54,8 @@ class AgentUser(HttpUser):
         """Authenticate user and get token."""
         with self.client.post(
             "/api/auth/login",
-            json={
-                "username": f"user_{random_string()}",
-                "password": "testpassword123"
-            },
-            catch_response=True
+            json={"username": f"user_{random_string()}", "password": "testpassword123"},
+            catch_response=True,
         ) as response:
             if response.status_code == 200:
                 data = response.json()
@@ -81,11 +78,11 @@ class AgentUser(HttpUser):
                 "parcel_id": f"parcel_{random_string()}",
                 "model": "gpt-4",
                 "wallet_address": random_address(),
-                "initial_balance": random.uniform(100.0, 10000.0)
+                "initial_balance": random.uniform(100.0, 10000.0),
             },
             headers=self.headers,
             catch_response=True,
-            name="/api/agents [create]"
+            name="/api/agents [create]",
         ) as response:
             if response.status_code == 201:
                 self.agent_id = response.json().get("id")
@@ -98,17 +95,11 @@ class AgentUser(HttpUser):
         """Get agent status - most frequent operation."""
         if self.agent_id:
             self.client.get(
-                f"/api/agents/{self.agent_id}",
-                headers=self.headers,
-                name="/api/agents/{id} [get]"
+                f"/api/agents/{self.agent_id}", headers=self.headers, name="/api/agents/{id} [get]"
             )
         else:
             # Fallback - list all agents
-            self.client.get(
-                "/api/agents",
-                headers=self.headers,
-                name="/api/agents [list]"
-            )
+            self.client.get("/api/agents", headers=self.headers, name="/api/agents [list]")
 
     @task(2)
     def place_trade_order(self):
@@ -121,11 +112,11 @@ class AgentUser(HttpUser):
                     "action": random.choice(["buy", "sell"]),
                     "parcel_id": f"parcel_{random_string()}",
                     "amount": random.uniform(10.0, 1000.0),
-                    "price": random.uniform(100.0, 5000.0)
+                    "price": random.uniform(100.0, 5000.0),
                 },
                 headers=self.headers,
                 catch_response=True,
-                name="/api/trades [create]"
+                name="/api/trades [create]",
             ) as response:
                 if response.status_code in [200, 201]:
                     data = response.json()
@@ -137,9 +128,7 @@ class AgentUser(HttpUser):
         """Check the status of a trade."""
         if self.trade_id:
             self.client.get(
-                f"/api/trades/{self.trade_id}",
-                headers=self.headers,
-                name="/api/trades/{id} [get]"
+                f"/api/trades/{self.trade_id}", headers=self.headers, name="/api/trades/{id} [get]"
             )
 
     @task(1)
@@ -154,13 +143,13 @@ class AgentUser(HttpUser):
                     "terms": {
                         "parcel_id": f"parcel_{random_string()}",
                         "price": random.uniform(1000.0, 50000.0),
-                        "delivery_date": "2026-06-30"
+                        "delivery_date": "2026-06-30",
                     },
-                    "type": "sale_agreement"
+                    "type": "sale_agreement",
                 },
                 headers=self.headers,
                 catch_response=True,
-                name="/api/contracts [create]"
+                name="/api/contracts [create]",
             ) as response:
                 if response.status_code in [200, 201]:
                     data = response.json()
@@ -174,7 +163,7 @@ class AgentUser(HttpUser):
             self.client.get(
                 f"/api/contracts/{self.contract_id}",
                 headers=self.headers,
-                name="/api/contracts/{id} [get]"
+                name="/api/contracts/{id} [get]",
             )
 
     @task(1)
@@ -199,10 +188,10 @@ class HighFrequencyTradingUser(AgentUser):
                     "action": random.choice(["buy", "sell"]),
                     "parcel_id": f"parcel_{random_string()}",
                     "amount": random.uniform(1.0, 100.0),
-                    "price": random.uniform(50.0, 500.0)
+                    "price": random.uniform(50.0, 500.0),
                 },
                 headers=self.headers,
-                name="/api/trades [rapid]"
+                name="/api/trades [rapid]",
             )
 
     @task(5)
@@ -212,7 +201,7 @@ class HighFrequencyTradingUser(AgentUser):
             self.client.get(
                 f"/api/agents/{self.agent_id}/balance",
                 headers=self.headers,
-                name="/api/agents/{id}/balance"
+                name="/api/agents/{id}/balance",
             )
 
 
@@ -240,7 +229,4 @@ class MarketObserverUser(HttpUser):
     def view_parcel_details(self):
         """View details of a parcel."""
         parcel_id = f"parcel_{random_string()}"
-        self.client.get(
-            f"/api/parcels/{parcel_id}",
-            name="/api/parcels/{id}"
-        )
+        self.client.get(f"/api/parcels/{parcel_id}", name="/api/parcels/{id}")

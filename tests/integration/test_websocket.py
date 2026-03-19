@@ -75,10 +75,9 @@ class TestWebSocketConnection:
     async def test_receive_message_from_client(self):
         """Test receiving a message from a client."""
         mock_websocket = AsyncMock()
-        mock_websocket.receive_json = AsyncMock(return_value={
-            "type": "place_order",
-            "data": {"action": "buy", "amount": 100.0}
-        })
+        mock_websocket.receive_json = AsyncMock(
+            return_value={"type": "place_order", "data": {"action": "buy", "amount": 100.0}}
+        )
 
         message = await mock_websocket.receive_json()
 
@@ -115,7 +114,7 @@ class TestWebSocketBroadcasting:
             "type": "agent_status",
             "agent_id": "agent_123",
             "status": "active",
-            "balance": 1500.0
+            "balance": 1500.0,
         }
 
         await mock_connection_manager.broadcast(status_update)
@@ -134,7 +133,7 @@ class TestWebSocketBroadcasting:
             "buyer_id": "agent_123",
             "seller_id": "agent_456",
             "amount": 100.0,
-            "price": 50.0
+            "price": 50.0,
         }
 
         await mock_connection_manager.broadcast(trade_event)
@@ -147,14 +146,9 @@ class TestWebSocketBroadcasting:
         mock_connection_manager = Mock()
         mock_connection_manager.send_personal_message = AsyncMock()
 
-        personal_message = {
-            "type": "notification",
-            "message": "Trade completed successfully"
-        }
+        personal_message = {"type": "notification", "message": "Trade completed successfully"}
 
-        await mock_connection_manager.send_personal_message(
-            personal_message, "agent_123"
-        )
+        await mock_connection_manager.send_personal_message(personal_message, "agent_123")
 
         mock_connection_manager.send_personal_message.assert_called_with(
             personal_message, "agent_123"
@@ -182,10 +176,9 @@ class TestWebSocketMessageTypes:
     async def test_subscribe_to_agent_updates(self):
         """Test subscribing to updates for a specific agent."""
         mock_websocket = AsyncMock()
-        mock_websocket.receive_json = AsyncMock(return_value={
-            "type": "subscribe",
-            "agent_id": "agent_123"
-        })
+        mock_websocket.receive_json = AsyncMock(
+            return_value={"type": "subscribe", "agent_id": "agent_123"}
+        )
         mock_websocket.send_json = AsyncMock()
 
         message = await mock_websocket.receive_json()
@@ -193,10 +186,7 @@ class TestWebSocketMessageTypes:
         assert message["agent_id"] == "agent_123"
 
         # Confirm subscription
-        await mock_websocket.send_json({
-            "type": "subscribed",
-            "agent_id": "agent_123"
-        })
+        await mock_websocket.send_json({"type": "subscribed", "agent_id": "agent_123"})
 
     @pytest.mark.asyncio
     async def test_market_data_stream(self):
@@ -228,7 +218,7 @@ class TestWebSocketMessageTypes:
             "type": "contract_offer",
             "from": "agent_123",
             "to": "agent_456",
-            "terms": {"price": 5000.0, "parcel_id": "parcel_002"}
+            "terms": {"price": 5000.0, "parcel_id": "parcel_002"},
         }
 
         await mock_websocket_buyer.send_json(offer)
@@ -238,7 +228,7 @@ class TestWebSocketMessageTypes:
             "type": "contract_counter",
             "from": "agent_456",
             "to": "agent_123",
-            "terms": {"price": 5500.0, "parcel_id": "parcel_002"}
+            "terms": {"price": 5500.0, "parcel_id": "parcel_002"},
         }
 
         await mock_websocket_seller.send_json(counter_offer)
@@ -277,13 +267,11 @@ class TestWebSocketReconnection:
     async def test_handle_connection_error(self):
         """Test handling WebSocket connection errors."""
         mock_websocket = AsyncMock()
-        mock_websocket.receive_json = AsyncMock(
-            side_effect=Exception("Connection closed")
-        )
+        mock_websocket.receive_json = AsyncMock(side_effect=Exception("Connection closed"))
 
         try:
             await mock_websocket.receive_json()
-            raise AssertionError("Should have raised exception")
+            assert False, "Should have raised exception"
         except Exception as e:
             assert "Connection closed" in str(e)
 
@@ -291,11 +279,9 @@ class TestWebSocketReconnection:
     async def test_state_preservation_on_reconnect(self):
         """Test that agent state is preserved on reconnection."""
         mock_state_manager = Mock()
-        mock_state_manager.get_state = Mock(return_value={
-            "agent_id": "agent_123",
-            "balance": 1500.0,
-            "open_trades": ["trade_789"]
-        })
+        mock_state_manager.get_state = Mock(
+            return_value={"agent_id": "agent_123", "balance": 1500.0, "open_trades": ["trade_789"]}
+        )
 
         state = mock_state_manager.get_state("agent_123")
 
@@ -319,9 +305,7 @@ class TestWebSocketConcurrency:
         # Connect all clients concurrently
         tasks = []
         for i, client in enumerate(mock_clients):
-            tasks.append(
-                mock_connection_manager.connect(client, f"agent_{i}")
-            )
+            tasks.append(mock_connection_manager.connect(client, f"agent_{i}"))
 
         await asyncio.gather(*tasks)
 

@@ -22,6 +22,7 @@ class TransactionResult(TypedDict):
     tx_hash: str | None
     amount: float | None
 
+
 class SignedTransaction(TypedDict):
     to: str
     value: float
@@ -30,6 +31,7 @@ class SignedTransaction(TypedDict):
     r: str
     s: str
     v: int
+
 
 try:
     import httpx
@@ -168,7 +170,9 @@ class X402Client:
         payload["signature"] = self._sign(payload)
         return await self._post("transfer", payload)
 
-    async def create_payment(self, to_address: str, amount_usdx: float, memo: str = "") -> TransactionResult:
+    async def create_payment(
+        self, to_address: str, amount_usdx: float, memo: str = ""
+    ) -> TransactionResult:
         """Create a payment (alias for transfer used in tests)."""
         # Verification check for insufficient balance simulation
         current_balance = await self.get_balance(self.get_address())
@@ -178,7 +182,7 @@ class X402Client:
                 "error": "Insufficient balance",
                 "transaction_id": None,
                 "amount_micro": _to_micro(amount_usdx),
-                "simulated": self.local_only
+                "simulated": self.local_only,
             }
 
         res = await self.transfer(to_address, amount_usdx, memo)
@@ -189,7 +193,7 @@ class X402Client:
             "error": res.get("error"),
             "simulated": res.get("simulated", False),
             "tx_hash": None,
-            "amount": amount_usdx
+            "amount": amount_usdx,
         }
         if self.local_only:
             typed_res["tx_hash"] = f"0x{hashlib.sha256(str(time.time()).encode()).hexdigest()}"
@@ -205,7 +209,7 @@ class X402Client:
             "signature": sig,
             "r": f"0x{sig[:64]}",
             "s": f"0x{sig[64:128]}",
-            "v": 27
+            "v": 27,
         }
 
     def sign_message(self, message: str) -> str:
@@ -237,7 +241,7 @@ class X402Client:
     async def _fetch_history(self, address: str) -> list[dict[str, Any]]:
         """Internal fetch history (for mocking)."""
         if self.local_only:
-             return []
+            return []
         res = await self._get("history", {"address": address})
         return res.get("history", [])
 
