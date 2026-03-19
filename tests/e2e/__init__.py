@@ -1,11 +1,5 @@
 """End-to-end tests for Web4AGI agent systems."""
 
-"""End-to-end tests for Web4AGI agent systems."""
-
-import asyncio
-import os
-from typing import Any, Dict
-
 import pytest
 
 
@@ -33,8 +27,6 @@ class TestAgentWorkflow:
     async def test_agent_to_agent_communication(self):
         """Test communication between two parcel agents."""
         # Initialize two agents
-        agent1_config = {"parcel_id": "parcel-001", "wallet_address": "0x1234"}
-        agent2_config = {"parcel_id": "parcel-002", "wallet_address": "0x5678"}
 
         # Test message exchange
         message = {"type": "trade_proposal", "amount": 100, "asset": "USDC"}
@@ -80,7 +72,6 @@ class TestContractExecution:
     async def test_contract_signing(self):
         """Test multi-party contract signing."""
         contract_id = "contract-001"
-        signatures = []
 
         # TODO: Implement signature collection
         # Each agent should sign with their wallet
@@ -103,7 +94,11 @@ class TestX402Protocol:
     @pytest.mark.asyncio
     async def test_x402_message_format(self):
         """Test X402 protocol message formatting."""
-        message = {"protocol": "x402", "version": "1.0", "payload": {"action": "trade", "data": {}}}
+        message = {
+            "protocol": "x402",
+            "version": "1.0",
+            "payload": {"action": "trade", "data": {}},
+        }
 
         assert message["protocol"] == "x402"
         assert message["version"] == "1.0"

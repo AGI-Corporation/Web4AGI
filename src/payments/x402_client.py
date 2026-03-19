@@ -218,6 +218,8 @@ class X402Client:
 
     def verify_signature(self, message: str, signature: str, signer_address: str) -> bool:
         """Verify a message signature."""
+        # signer_address is used for multi-sig validation in future
+        _ = signer_address
         if self.local_only:
             return True
         return self._sign({"message": message}) == signature

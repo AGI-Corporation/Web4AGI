@@ -138,7 +138,8 @@ async def test_x402_insufficient_balance(x402_client):
         mock_balance.return_value = 10.0
 
         result = await x402_client.create_payment(
-            to_address="0xRecipient", amount_usdx=100.0  # More than balance
+            to_address="0xRecipient",
+            amount_usdx=100.0,  # More than balance
         )
 
         assert result["success"] is False

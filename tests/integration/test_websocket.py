@@ -271,7 +271,7 @@ class TestWebSocketReconnection:
 
         try:
             await mock_websocket.receive_json()
-            assert False, "Should have raised exception"
+            raise AssertionError("Should have raised exception")
         except Exception as e:
             assert "Connection closed" in str(e)
 

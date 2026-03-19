@@ -103,11 +103,6 @@ class TestAgentModelIntegration:
 
     async def test_agent_sentient_foundation_integration(self):
         """Test agent integrates with Sentient Foundation model."""
-        model_config = {
-            "name": "sentient-foundation",
-            "version": "1.0",
-            "capabilities": ["reasoning", "decision_making"],
-        }
 
         model_mock = AsyncMock()
         model_mock.generate_response.return_value = {"decision": "accept_trade", "confidence": 0.85}

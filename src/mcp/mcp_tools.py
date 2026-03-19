@@ -211,9 +211,15 @@ class MCPToolkit:
             return local
 
     def register_tool(
-        self, name: str, func: Callable, description: str = "", parameters: dict[str, Any] = None
+        self,
+        name: str,
+        func: Callable,
+        description: str = "",
+        parameters: dict[str, Any] = None,
     ):
         """Register a tool to the local registry."""
+        # description and parameters are used for documentation/discovery in future
+        _ = (description, parameters)
         _LOCAL_TOOLS[name] = func
         return func
 

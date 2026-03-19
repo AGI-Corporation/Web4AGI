@@ -1,6 +1,7 @@
 import asyncio
 
 import httpx
+
 from src.agents.parcel_agent import ParcelAgent
 
 
@@ -21,7 +22,6 @@ async def run_verification():
     from unittest.mock import AsyncMock, patch
 
     with patch("httpx.AsyncClient.post") as mock_post, patch("httpx.AsyncClient.get") as mock_get:
-
         # Mock storage for the "expressor"
         inboxes = {}
 

@@ -4,6 +4,7 @@ import asyncio
 from typing import Any
 
 import pytest
+
 from src.agents.parcel_agent import ParcelAgent
 from src.agents.trade_agent import TradeAgent
 from src.mcp.mcp_tools import MCPToolkit

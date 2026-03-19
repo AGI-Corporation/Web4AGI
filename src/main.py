@@ -18,7 +18,7 @@ TRADE_AGENTS = {}  # agent_id -> TradeAgent instance
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     """Startup/shutdown lifecycle for FastAPI app."""
     # Startup: initialize any persistent connections, etc.
     print(f"[Web4AGI] Starting up... version {__version__}")

@@ -1,6 +1,5 @@
 """End-to-end workflow tests for Web4AGI agents."""
 
-
 import pytest
 
 
@@ -29,7 +28,6 @@ class TestCompleteAgentLifecycle:
 
     async def test_agent_update_workflow(self):
         """Test updating agent with new model/capabilities."""
-        agent_id = "test-agent-001"
         update = {"model": "sentient-foundation-v2", "new_capabilities": ["advanced_trading"]}
 
         # TODO: Implement agent update mechanism
@@ -188,15 +186,7 @@ class TestCrossProtocolCommunication:
 
     async def test_pubsub_pattern(self):
         """Test publish-subscribe pattern for events."""
-        topic = "market.prices.usdc"
-        publishers = ["agent-001"]
         subscribers = ["agent-002", "agent-003", "agent-004"]
-
-        event = {
-            "topic": topic,
-            "data": {"price": 1.00, "volume": 1000000},
-            "timestamp": "2025-01-15T12:00:00Z",
-        }
 
         # TODO: Implement pubsub
         assert len(subscribers) >= 2
@@ -217,7 +207,7 @@ class TestScalabilityScenarios:
                 {
                     "id": f"tx-{i:04d}",
                     "from": f"agent-{i % 10:03d}",
-                    "to": f"agent-{(i+1) % 10:03d}",
+                    "to": f"agent-{(i + 1) % 10:03d}",
                     "amount": 10,
                     "currency": "USDC",
                 }

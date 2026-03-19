@@ -1,6 +1,7 @@
 """Tests for Web4AGI agent classes."""
 
 import pytest
+
 from src.agents.trade_agent import TradeAgent
 
 # ── ParcelAgent Tests ───────────────────────────────────────────────────────

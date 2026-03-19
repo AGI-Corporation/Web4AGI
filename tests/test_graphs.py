@@ -3,6 +3,7 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
+
 from src.graphs.langgraph_workflow import (
     ParcelOptimizationWorkflow,
     WorkflowState,
@@ -229,7 +230,7 @@ async def test_workflow_with_memory():
 
     with patch.object(workflow, "_call_llm", new_callable=AsyncMock) as mock_llm:
         mock_llm.return_value = {"assessment": "positive"}
-        result1 = await workflow.run(state1)
+        await workflow.run(state1)
 
     # Second run should access memory
     assert workflow.memory is not None

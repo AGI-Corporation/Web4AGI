@@ -95,7 +95,7 @@ class TestTradingLifecycle:
 
         try:
             await payment_client.transfer("0xbuyer", "0xseller", 1000000.0)
-            assert False, "Should have raised Exception"
+            raise AssertionError("Should have raised Exception")
         except Exception as e:
             assert str(e) == "Insufficient balance"
 

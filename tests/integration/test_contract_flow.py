@@ -96,7 +96,7 @@ class TestContractLifecycle:
 
         try:
             manager.propose(buyer.id, seller.id, invalid_terms)
-            assert False, "Should have raised ValueError"
+            raise AssertionError("Should have raised ValueError")
         except ValueError as e:
             assert str(e) == "Invalid contract terms"
 

@@ -155,17 +155,21 @@ class ParcelAgent:
 
     async def _handle_message(self, msg: dict) -> None:
         """Route incoming MCP messages to appropriate handlers."""
-        msg_type = msg.get("type", "unknown")
+        # Handle enveloped messages from MCPToolkit/Route.X
+        data = msg.get("payload", msg)
+        msg_type = data.get("type", "unknown")
+        sender = data.get("from", msg.get("from", "unknown"))
+
         if msg_type == "trade_request":
             await self.trade(
-                counterparty_id=msg["from"],
-                amount_usdx=msg["amount"],
-                trade_type=msg.get("trade_type", "transfer"),
+                counterparty_id=sender,
+                amount_usdx=data["amount"],
+                trade_type=data.get("trade_type", "transfer"),
             )
         elif msg_type == "contract_offer":
             await self.sign_contract(
-                counterparty_id=msg["from"],
-                contract=msg["contract"],
+                counterparty_id=sender,
+                contract=data["contract"],
             )
         elif msg_type == "optimize":
             await self.optimize(context=msg.get("context"))
