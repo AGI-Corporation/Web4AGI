@@ -11,7 +11,7 @@ import json
 import os
 import uuid
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 try:
@@ -182,7 +182,7 @@ class MCPToolkit:
                 "name": tool_name,
                 "arguments": args,
             },
-            "id": f"{self.agent_id}-{int(datetime.now(UTC).timestamp() * 1000)}",
+            "id": f"{self.agent_id}-{int(datetime.now(timezone.utc).timestamp() * 1000)}",
         }
 
         if httpx is None:
@@ -266,7 +266,7 @@ class MCPToolkit:
             "from": self.agent_id,
             "to": to,
             "payload": payload,
-            "sent_at": datetime.now(UTC).isoformat(),
+            "sent_at": datetime.now(timezone.utc).isoformat(),
         }
         self._outbox.append(envelope)
 
@@ -326,7 +326,7 @@ class MCPToolkit:
         required = ["from", "to", "payload", "sent_at"]
         return all(k in message for k in required)
 
-    def validate_parameters(self, tool_spec: dict, params: dict) -> (bool, str | None):
+    def validate_parameters(self, tool_spec: dict, params: dict) -> tuple[bool, str | None]:
         """Validate parameters against a tool JSON schema."""
         schema = tool_spec.get("input_schema", {})
         required = schema.get("required", [])

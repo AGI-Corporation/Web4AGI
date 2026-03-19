@@ -6,7 +6,7 @@ Built on top of ParcelAgent with added auction and batch-trade logic.
 
 import asyncio
 import logging
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from src.mcp.mcp_tools import MCPToolkit
@@ -26,16 +26,20 @@ class TradeOffer:
         self.seller_id = seller_id
         self.asset = asset
         self.amount_usdx = amount_usdx
-        self.expires_at = datetime.now(UTC).timestamp() + ttl_seconds
+        self.expires_at = datetime.now(timezone.utc).timestamp() + ttl_seconds
         self.bids: list[dict] = []
         self.accepted: dict | None = None
 
     def is_expired(self) -> bool:
-        return datetime.now(UTC).timestamp() > self.expires_at
+        return datetime.now(timezone.utc).timestamp() > self.expires_at
 
     def add_bid(self, bidder_id: str, bid_amount: float) -> None:
         self.bids.append(
-            {"bidder": bidder_id, "amount": bid_amount, "ts": datetime.now(UTC).isoformat()}
+            {
+                "bidder": bidder_id,
+                "amount": bid_amount,
+                "ts": datetime.now(timezone.utc).isoformat(),
+            }
         )
 
     def best_bid(self) -> dict | None:
@@ -66,7 +70,7 @@ class TradeAgent:
         amount_usdx: float,
         ttl_seconds: int = 300,
     ) -> TradeOffer:
-        offer_id = f"offer-{seller_id}-{int(datetime.now(UTC).timestamp())}"
+        offer_id = f"offer-{seller_id}-{int(datetime.now(timezone.utc).timestamp())}"
         offer = TradeOffer(offer_id, seller_id, asset, amount_usdx, ttl_seconds)
         self.offers[offer_id] = offer
         self.logger.info(f"Created trade offer {offer_id} for asset {asset}")
@@ -119,7 +123,7 @@ class TradeAgent:
             "winner": winner["bidder"],
             "amount": winner["amount"],
             "asset": offer.asset,
-            "closed_at": datetime.now(UTC).isoformat(),
+            "closed_at": datetime.now(timezone.utc).isoformat(),
         }
         self.trade_history.append(record)
         self.logger.info(
@@ -210,7 +214,7 @@ class TradeAgent:
                 "duration_months": duration_months,
                 "total_usdx": monthly_usdx * duration_months,
             },
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "status": "pending_signatures",
         }
 
@@ -231,7 +235,7 @@ class TradeAgent:
                 "access_type": "read",
                 "duration": "perpetual",
             },
-            "created_at": datetime.now(UTC).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "status": "pending_signatures",
         }
 

@@ -12,7 +12,7 @@ import asyncio
 import logging
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from src.mcp.mcp_tools import MCPToolkit
@@ -27,7 +27,7 @@ class ParcelState:
     metadata: dict[str, Any] = field(default_factory=dict)
     balance_usdx: float = 0.0
     active: bool = True
-    last_updated: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    last_updated: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 class ParcelAgent:
@@ -58,7 +58,7 @@ class ParcelAgent:
     def update_metadata(self, key: str, value: Any) -> None:
         """Update a metadata field on the parcel."""
         self.state.metadata[key] = value
-        self.state.last_updated = datetime.now(UTC).isoformat()
+        self.state.last_updated = datetime.now(timezone.utc).isoformat()
 
     def get_state(self) -> dict[str, Any]:
         """Return the current parcel state as a dict."""
@@ -81,7 +81,7 @@ class ParcelAgent:
             target_id=target_parcel_id,
             content={
                 "parcel_id": self.parcel_id,
-                "timestamp": datetime.now(UTC).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 **content,
             },
         )
